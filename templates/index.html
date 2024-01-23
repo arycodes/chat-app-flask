@@ -12,7 +12,8 @@
         /* Styling for the body */
         body {
             background-color: #f8f9fa;
-            display: none; /* Initially hide the body */
+            display: none;
+            /* Initially hide the body */
         }
 
         /* Styling for the main container */
@@ -83,13 +84,48 @@
         button {
             align-self: flex-end;
         }
+
+        /* Styling for the dark theme */
+        body.dark-mode {
+            background-color: #343a40;
+            color: #fff;
+        }
+
+        .container.dark-mode {
+            background-color: #343a40;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        }
+
+        #chat-box.dark-mode {
+            border: 1px solid #495057;
+            background-color: #212529;
+        }
+
+        .message.dark-mode {
+            background-color: #495057;
+            color: #fff;
+        }
+
+        /* Styling for the dark theme - additional modifications */
+        label.dark-mode {
+            color: #fff;
+        }
+
+        button.dark-mode {
+            background-color: #007bff;
+            color: #fff;
+        }
     </style>
 </head>
 
 <body>
     <div class="container mt-5">
         <!-- Application Title -->
-        <h1 class="mb-4">AryCodes Chat App</h1>
+        <h1 class="mb-4">AryCodes Chat App
+            <button id="theme-toggle" class="btn btn-secondary dark-mode">Toggle Theme</button>
+
+        </h1>
+
         <!-- Chat Box Container -->
         <div id="chat-box" class="mb-3"></div>
         <!-- Chat Form -->
@@ -103,6 +139,8 @@
             <button type="submit" class="btn btn-primary">Send</button>
         </form>
     </div>
+
+    <!-- Theme Toggle Button -->
 
     <!-- External JavaScript Libraries -->
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
@@ -191,6 +229,21 @@
 
                     $('#message').val('');
                 }
+            });
+
+            // Function to toggle between light and dark themes
+            function toggleTheme() {
+                $('body').toggleClass('dark-mode');
+                $('.container').toggleClass('dark-mode');
+                $('#chat-box').toggleClass('dark-mode');
+                $('.message').toggleClass('dark-mode');
+                $('label').toggleClass('dark-mode');
+                $('button').toggleClass('dark-mode');
+            }
+
+            // Event listener for theme toggle button
+            $('#theme-toggle').click(function () {
+                toggleTheme();
             });
         });
     </script>
