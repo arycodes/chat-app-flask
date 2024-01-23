@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Chat App</title>
+    <!-- External Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Internal Styles -->
+    <style>
+        /* Styling for the body */
+        body {
+            background-color: #f8f9fa;
+            display: none; /* Initially hide the body */
+        }
+
+        /* Styling for the main container */
+        .container {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            max-width: 800px;
+            height: 80vh;
+        }
+
+        /* Styling for the chat box */
+        #chat-box {
+            max-height: 70%;
+            overflow-y: auto;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            padding: 10px;
+            background-color: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Styling for individual chat messages */
+        .message {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            word-wrap: break-word;
+        }
+
+        /* Styling for sent messages */
+        .message.sent {
+            background-color: #007bff;
+            color: #fff;
+            align-self: flex-end;
+            width: fit-content;
+            max-width: 80%;
+            float: right;
+        }
+
+        /* Styling for received messages */
+        .message.received {
+            background-color: #28a745;
+            color: #fff;
+            width: fit-content;
+            max-width: 80%;
+        }
+
+        /* Styling for form group */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        /* Styling for form */
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Styling for labels */
+        label {
+            font-weight: bold;
+        }
+
+        /* Styling for button */
+        button {
+            align-self: flex-end;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-5">
+        <!-- Application Title -->
+        <h1 class="mb-4">AryCodes Chat App</h1>
+        <!-- Chat Box Container -->
+        <div id="chat-box" class="mb-3"></div>
+        <!-- Chat Form -->
+        <form id="chat-form">
+            <!-- Input for typing messages -->
+            <div class="form-group">
+                <label for="message">Message:</label>
+                <input type="text" id="message" class="form-control" required>
+            </div>
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary">Send</button>
+        </form>
+    </div>
+
+    <!-- External JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+
+    <!-- Internal JavaScript Code -->
+    <script>
+        $(document).ready(function () {
+            let validPassword = false;
+
+            // Function to continuously prompt for password until valid
+            function askForPassword() {
+                const password = prompt("Please enter the password:");
+
+                if (password === "your_secret_password") {
+                    validPassword = true;
+                    $('body').show(); // Show the body when the password is valid
+                } else {
+                    alert("Invalid password. Please try again.");
+                    askForPassword(); // Ask for password again
+                }
+            }
+
+            askForPassword(); // Start asking for the password
+
+            const chatBox = $('#chat-box');
+            const chatForm = $('#chat-form');
+
+            let username = prompt("Please enter your username:");
+
+            // Validate username input
+            while (username === null || !username.trim()) {
+                alert("Invalid username. Please try again.");
+                username = prompt("Please enter your username:");
+            }
+
+            console.log("Valid username:", username);
+
+            const socket = io();
+
+            if (username && validPassword) {
+                var timestamp = new Date().getTime();
+                var date = new Date(timestamp);
+                var formattedDate = date.toLocaleString();
+
+                const data = {
+                    username: username,
+                    message: `${username} joined the chat on ${formattedDate}`,
+                };
+
+                socket.emit('message', data);
+
+                $('#message').val('');
+            }
+
+            // Function to append messages to the chat box
+            function appendMessage(message, isSent) {
+                const messageClass = isSent ? 'sent' : 'received';
+                const div = $('<div class="message"></div>').addClass(messageClass).text(`${message.username}: ${message.message}`);
+                chatBox.append(div);
+            }
+
+            // Event listener for updating the chat
+            socket.on('update_chat', function (messages) {
+                chatBox.html('');
+                messages.forEach(message => {
+                    const isSent = message.username === username;
+                    appendMessage(message, isSent);
+                });
+            });
+
+            // Event listener for form submission (sending messages)
+            chatForm.submit(function (event) {
+                event.preventDefault();
+                const message = $('#message').val();
+
+                if (message) {
+                    const data = {
+                        username: username,
+                        message: message,
+                    };
+
+                    socket.emit('message', data);
+
+                    $('#message').val('');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
